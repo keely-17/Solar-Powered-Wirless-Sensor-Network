@@ -1,0 +1,26 @@
+science/
+
+
+# Virtual environment
+.venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# IDE-specific files (optional, but recommended)
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Data files (if you don't want to track them)
+data/*
+
+# Logs
+*.log
+
+# Environment variables file (if you use one)
+.env
