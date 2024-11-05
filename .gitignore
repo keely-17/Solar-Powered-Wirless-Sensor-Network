@@ -24,3 +24,6 @@ data/*
 
 # Environment variables file (if you use one)
 .env
+
+# Logged data
+data/log.data
