@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Data</title>
+    <!-- <link rel="stylesheet" href="/static/css/style.css"> -->
+</head>
+<body id="box">
+    <header>
+        <h1>Solar Powered Wireless Sensor Network Information</h1>
+    </header>
+    <main>
+        <section id="weather-data">
+            <h2>Weather Data</h2>
+            <div id="latest-data">
+                <h3>Latest Data</h3>
+                <p>Temperature: <span id="temperature"></span>°F</p>
+                <p>Humidity: <span id="humidity"></span>%</p>
+                <p>Timestamp: <span id="timestamp"></span></p>
+            </div>
+            <div id="historical-data">
+                <h3>Historical Data</h3>
+                <form onsubmit="fetchHistoricalData(); return false;">
+                    <input type="date" id="date-picker" required>
+                    <button type="submit">Get Data</button>
+                </form>
+                <div id="historical-results"></div>
+            </div>
+        </section>
+        <section id="about">
+            <h3>About this Project</h3>
+            <p>This project is designed to be a portable weather station with live connections or broadcast of any type of weather like humidity and temperature. Project files can be found at:</p>
+            <p><a href="https://github.com/Keely-17/Solar-Powered-Wirless-Sensor-Network" target="_blank" rel="noopener noreferrer">My GitHub Repository</a></p>
+        </section>
+        <section id="sensor-info">
+            <h3>Sensor Information</h3>
+            <p><em>Sensor Info Here</em></p>
+        </section>
+        <section id="project-media">
+            <h3>Project Video</h3>
+            <p><em>Video Here</em></p>
+            <h3>Project Photos</h3>
+            <p><em>Photos Here</em></p>
+        </section>
+    </main>
+    <footer>
+        <p>&lt;&lt;&lt; &copy; Keely D'Amore &gt;&gt;&gt;</p>
+    </footer>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</body>
+</html>
