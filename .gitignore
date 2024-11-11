@@ -3,6 +3,7 @@ science/
 
 # Virtual environment
 .venv/
+local_science_env/
 
 # Python cache files
 __pycache__/
