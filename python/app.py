@@ -1,9 +1,6 @@
 from flask import Flask, jsonify, render_template
 import sqlite3
 import os
-from flask import Flask, jsonify, render_template
-import sqlite3
-import os
 from datetime import datetime
 
 app = Flask(__name__)
