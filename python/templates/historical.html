@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Data</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Solar Powered Wireless Weather Data</h1>
+        
+        <!-- Latest Data Section -->
+        <h2>Latest Data</h2>
+        <div id="latest-data" class="mb-4">
+            <p>Loading latest data...</p>
+        </div>
+
+        <!-- Historical Data Section -->
+        <h2>Historical Data</h2>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="start-date" class="form-label">Start Date:</label>
+                <input type="date" id="start-date" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label for="end-date" class="form-label">End Date:</label>
+                <input type="date" id="end-date" class="form-control">
+            </div>
+        </div>
+        <button id="fetch-data" class="btn btn-primary mb-3">Get Historical Data</button>
+        <div id="data-container"></div>
+        <canvas id="temperatureChart" width="400" height="200"></canvas>
+        <canvas id="humidityChart" width="400" height="200"></canvas>
+
+        <!-- About Section -->
+        <section id="about" class="mt-5">
+            <h3>About this Project</h3>
+            <p>This project is designed to be a portable weather station with live connections or broadcast of any type of weather like humidity and temperature. Project files can be found at:</p>
+            <p><a href="https://github.com/Keely-17/Solar-Powered-Wirless-Sensor-Network" target="_blank" rel="noopener noreferrer">My GitHub Repository</a></p>
+        </section>
+
+        <!-- Sensor Information Section -->
+        <section id="sensor-info" class="mt-4">
+            <h3>Sensor Information</h3>
+            <p><em>Sensor Info Here</em></p>
+        </section>
+
+        <!-- Project Media Section -->
+        <section id="project-media" class="mt-4">
+            <h3>Project Video</h3>
+            <p><em>Video Here</em></p>
+            <h3>Project Photos</h3>
+            <p><em>Photos Here</em></p>
+        </section>
+    </div>
+
+    <footer class="container mt-5">
+        <p class="text-center">&lt;&lt;&lt; &copy; Keely D'Amore &gt;&gt;&gt;</p>
+    </footer>
+    </div>
+
+    <script>
+        let temperatureChart;
+        let humidityChart;
+
+        // Fetch latest data on page load
+        window.onload = function() {
+            fetchLatestData();
+            clearHistoricalData();
+        }
+
+        function fetchLatestData() {
+            fetch('/api/latest')
+                .then(response => response.json())
+                .then(data => {
+                    displayLatestData(data);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function displayLatestData(data) {
+            const container = document.getElementById('latest-data');
+            container.innerHTML = `
+                <p>Temperature: ${data.temperature.toFixed(1)}°C</p>
+                <p>Humidity: ${data.humidity.toFixed(1)}%</p>
+                <p>Timestamp: ${new Date(data.timestamp).toLocaleString()}</p>
+            `;
+        }
+
+        document.getElementById('fetch-data').addEventListener('click', fetchHistoricalData);
+
+        function fetchHistoricalData() {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+
+            fetch(`/api/historical?start_date=${startDate}&end_date=${endDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    displayHistoricalData(data);
+                    updateCharts(data);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function displayHistoricalData(data) {
+            const container = document.getElementById('data-container');
+            container.innerHTML = ''; // Clear previous data
+
+            if (data.length === 0) {
+                container.innerHTML = '<p>No data available for the selected date range.</p>';
+                return;
+            }
+
+            let html = '<div class="table-responsive"><table class="table"><tr><th>Date</th><th>Avg Temp</th><th>Min Temp</th><th>Max Temp</th><th>Avg Humidity</th><th>Min Humidity</th><th>Max Humidity</th></tr>';
+            
+            data.forEach(day => {
+                html += `<tr>
+                    <td>${day.date}</td>
+                    <td>${day.avg_temperature.toFixed(1)}°C</td>
+                    <td>${day.min_temperature.toFixed(1)}°C</td>
+                    <td>${day.max_temperature.toFixed(1)}°C</td>
+                    <td>${day.avg_humidity.toFixed(1)}%</td>
+                    <td>${day.min_humidity.toFixed(1)}%</td>
+                    <td>${day.max_humidity.toFixed(1)}%</td>
+                </tr>`;
+            });
+            
+            html += '</table></div>';
+            html += '<p class="mt-3"><a href="/detail" class="btn btn-secondary">View Detailed Historical Data</a></p>';
+            container.innerHTML = html;
+        }
+
+        function updateCharts(data) {
+            const dates = data.map(day => day.date);
+            const avgTemperatures = data.map(day => day.avg_temperature);
+            const avgHumidities = data.map(day => day.avg_humidity);
+
+            if (temperatureChart) {
+                temperatureChart.destroy();
+            }
+            if (humidityChart) {
+                humidityChart.destroy();
+            }
+
+            const tempCtx = document.getElementById('temperatureChart').getContext('2d');
+            temperatureChart = new Chart(tempCtx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Average Temperature (°C)',
+                        data: avgTemperatures,
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+
+            const humCtx = document.getElementById('humidityChart').getContext('2d');
+            humidityChart = new Chart(humCtx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Average Humidity (%)',
+                        data: avgHumidities,
+                        borderColor: 'rgb(54, 162, 235)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function clearHistoricalData() {
+            document.getElementById('data-container').innerHTML = '';
+            if (temperatureChart) {
+                temperatureChart.destroy();
+            }
+            if (humidityChart) {
+                humidityChart.destroy();
+            }
+        }
+    </script>
+    
+</body>
+</html>

@@ -1,7 +1,8 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 import sqlite3
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+import statistics
 
 app = Flask(__name__)
 
@@ -10,7 +11,7 @@ db_path = os.path.join(base_dir, 'data', 'weather.db')
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('historical.html')
 
 @app.route('/api/latest')
 def get_latest_data():
@@ -32,8 +33,78 @@ def get_latest_data():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/api/historical/<date>')
-def get_data_by_date(date):
+@app.route('/api/historical')
+def get_historical_data():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date', start_date)
+    
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        query = """
+        SELECT 
+            DATE(timestamp) as date,
+            AVG(temperature) as avg_temp,
+            MIN(temperature) as min_temp,
+            MAX(temperature) as max_temp,
+            AVG(humidity) as avg_humidity,
+            MIN(humidity) as min_humidity,
+            MAX(humidity) as max_humidity
+        FROM weather_data 
+        WHERE DATE(timestamp) BETWEEN DATE(?) AND DATE(?)
+        GROUP BY DATE(timestamp)
+        ORDER BY DATE(timestamp)
+        """
+        
+        cursor.execute(query, (start_date, end_date))
+        data = cursor.fetchall()
+        conn.close()
+        
+        if data:
+            result = [{
+                "date": row[0],
+                "avg_temperature": round(row[1], 1),
+                "min_temperature": round(row[2], 1),
+                "max_temperature": round(row[3], 1),
+                "avg_humidity": round(row[4], 1),
+                "min_humidity": round(row[5], 1),
+                "max_humidity": round(row[6], 1)
+            } for row in data]
+            return jsonify(result)
+        else:
+            return jsonify({"error": "No data available for the specified date range"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/historical/details')
+def get_historical_details():
+    date = request.args.get('date')
+    
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM weather_data WHERE DATE(timestamp) = DATE(?)", (date,))
+        data = cursor.fetchall()
+        conn.close()
+        
+        if data:
+            return jsonify([{
+                "timestamp": row[0],
+                "temperature": round(row[1], 1),
+                "humidity": round(row[2], 1)
+            } for row in data])
+        else:
+            return jsonify({"error": "No detailed data available for the specified date"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/detail')
+def detail_page():
+    return render_template('detail.html')
+
+@app.route('/api/detail/<date>')
+def get_detail_data(date):
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
@@ -49,26 +120,6 @@ def get_data_by_date(date):
             } for row in data])
         else:
             return jsonify({"error": "No data available for the specified date"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/range/<start_date>/<end_date>')
-def get_data_range(start_date, end_date):
-    try:
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM weather_data WHERE DATE(timestamp) BETWEEN DATE(?) AND DATE(?)", (start_date, end_date))
-        data = cursor.fetchall()
-        conn.close()
-        
-        if data:
-            return jsonify([{
-                "timestamp": row[0],
-                "temperature": round(row[1], 1),
-                "humidity": round(row[2], 1)
-            } for row in data])
-        else:
-            return jsonify({"error": "No data available for the specified date range"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
