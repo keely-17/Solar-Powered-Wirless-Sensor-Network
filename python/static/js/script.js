@@ -35,8 +35,8 @@ function fetchHistoricalData() {
 // Fetch latest data immediately when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     fetchLatestData();
-    // Then set up the interval to fetch every 60 seconds
-    setInterval(fetchLatestData, 60000);
+    // Then set up the interval to fetch every 30 minutes
+    setInterval(fetchLatestData, 1800000);
 });
 
 // Set up event listener for the historical data form

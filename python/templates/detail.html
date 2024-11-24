@@ -45,7 +45,7 @@
             data.forEach(record => {
                 html += `<tr>
                     <td>${new Date(record.timestamp).toLocaleString()}</td>
-                    <td>${record.temperature.toFixed(1)}°C</td>
+                    <td>${record.temperature.toFixed(1)}°F</td>
                     <td>${record.humidity.toFixed(1)}%</td>
                 </tr>`;
             });

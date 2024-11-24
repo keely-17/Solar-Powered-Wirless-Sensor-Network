@@ -83,7 +83,7 @@
         function displayLatestData(data) {
             const container = document.getElementById('latest-data');
             container.innerHTML = `
-                <p>Temperature: ${data.temperature.toFixed(1)}°C</p>
+                <p>Temperature: ${data.temperature.toFixed(1)}°F</p>
                 <p>Humidity: ${data.humidity.toFixed(1)}%</p>
                 <p>Timestamp: ${new Date(data.timestamp).toLocaleString()}</p>
             `;
@@ -118,9 +118,9 @@
             data.forEach(day => {
                 html += `<tr>
                     <td>${day.date}</td>
-                    <td>${day.avg_temperature.toFixed(1)}°C</td>
-                    <td>${day.min_temperature.toFixed(1)}°C</td>
-                    <td>${day.max_temperature.toFixed(1)}°C</td>
+                    <td>${day.avg_temperature.toFixed(1)}F</td>
+                    <td>${day.min_temperature.toFixed(1)}F</td>
+                    <td>${day.max_temperature.toFixed(1)}F</td>
                     <td>${day.avg_humidity.toFixed(1)}%</td>
                     <td>${day.min_humidity.toFixed(1)}%</td>
                     <td>${day.max_humidity.toFixed(1)}%</td>
@@ -150,7 +150,7 @@
                 data: {
                     labels: dates,
                     datasets: [{
-                        label: 'Average Temperature (°C)',
+                        label: 'Average Temperature (°F)',
                         data: avgTemperatures,
                         borderColor: 'rgb(255, 99, 132)',
                         tension: 0.1

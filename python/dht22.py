@@ -37,7 +37,7 @@ def read_and_store_dht_data():
             print(f"An error occurred: {e}")
         finally:
             conn.close()
-            time.sleep(300)  # Wait for 60 seconds before reading again
+            time.sleep(1800)  # Wait for 30 minutes before reading again
 
 if __name__ == "__main__":
     read_and_store_dht_data()
