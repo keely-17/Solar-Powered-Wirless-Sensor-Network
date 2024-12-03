@@ -106,12 +106,13 @@ def detail_page():
 @app.route('/api/detail/<date>')
 def get_detail_data(date):
     try:
+        # Validate the date format
+        datetime.strptime(date, '%Y-%m-%d')
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM weather_data WHERE DATE(timestamp) = DATE(?)", (date,))
         data = cursor.fetchall()
-        conn.close()
-        
+
         if data:
             return jsonify([{
                 "timestamp": row[0],
@@ -120,8 +121,12 @@ def get_detail_data(date):
             } for row in data])
         else:
             return jsonify({"error": "No data available for the specified date"}), 404
+    except ValueError:
+        return jsonify({"error": "Invalid date format. Please use YYYY-MM-DD."}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
 
 if __name__ == '__main__':
     import argparse
